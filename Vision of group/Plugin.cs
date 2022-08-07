@@ -32,19 +32,17 @@ namespace RegionDay
 
         void OnSendBytes(SendBytesEventArgs e)
         {
-            var plr = TShock.Players[e.Socket.Id];
-            if (plr == null)
-                return;
-
             using (var r = new BinaryReader(new MemoryStream(e.Buffer, 0, e.Buffer.Length)))
             {
                 r.ReadUInt16();
                 var msgID = r.ReadByte();
+                var playerID = r.ReadByte(); 
 
                 if (msgID != 4)
                     return;
 
-                var hex = new Color(plr.Group.R, plr.Group.G, plr.Group.B).Hex3();
+                var plr = TShock.Players[playerID];
+                var hex = plr == null ? "ffffff" : new Color(plr.Group.R, plr.Group.G, plr.Group.B).Hex3();
                 if (hex == "ffffff")
                     return;
 
@@ -55,7 +53,8 @@ namespace RegionDay
                         w.BaseStream.Position = 2;
 
                         w.Write(msgID);
-                        w.Write(r.ReadBytes(3));
+                        w.Write(playerID);
+                        w.Write(r.ReadBytes(2));
                         r.ReadString();
                         w.Write($"[c/{hex}:{plr.Name.Replace("]", @"\]")}]");
                         w.Write(r.ReadBytes(27));
