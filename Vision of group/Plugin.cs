@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using TShockAPI;
 
-namespace RegionDay
+namespace VisionOfGroups
 {
     [ApiVersion(2, 1)]
     public class Plugin : TerrariaPlugin
@@ -35,8 +35,16 @@ namespace RegionDay
             using (var r = new BinaryReader(new MemoryStream(e.Buffer, 0, e.Buffer.Length)))
             {
                 r.ReadUInt16();
-                var msgID = r.ReadByte();
-                var playerID = r.ReadByte(); 
+                byte msgID, playerID;
+                try
+                {
+                    msgID = r.ReadByte();
+                    playerID = r.ReadByte();
+                }
+                catch (EndOfStreamException)
+                {
+                    return;
+                }
 
                 if (msgID != 4)
                     return;
